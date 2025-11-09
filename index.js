@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -34,6 +34,7 @@ async function run() {
 
     const db = client.db("FoodsDb");
     const foodsCollection = db.collection("AllFoods");
+    const addFoodCollection = db.collection('AddFoods')
 
     //     app.get("/models", async (req, res) => {
     //   const result = await modelCollection.find().toArray();
@@ -44,6 +45,7 @@ async function run() {
         const result = await foodsCollection.find().toArray();
         res.send(result);
     })
+
     app.get('/featuredFoods', async(req, res) =>{
         const result = await foodsCollection.find().sort({food_quantity: 1}).limit(6).toArray();
         res.send(result);
@@ -53,6 +55,23 @@ async function run() {
         const foodItem = req.body;
         const result = await foodsCollection.insertOne(foodItem)
         res.send(result);
+    })
+    
+    app.get('/addFoods', async(req, res) =>{
+      const result = await addFoodCollection.find().toArray();
+      res.send(result);
+    })
+    app.post('/addFoods', async(req, res) =>{
+      const newFood = req.body;
+      const result = await addFoodCollection.insertOne(newFood)
+      res.send(result);
+    })
+
+    app.get('/food/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await foodsCollection.findOne(query);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
