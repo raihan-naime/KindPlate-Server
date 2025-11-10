@@ -107,17 +107,7 @@ async function run() {
       res.send(result);
     })
 
-    // app.delete("/models/:id", async (req, res) => {
-    //   const { id } = req.params;
-    //   //    const objectId = new ObjectId(id)
-    //   // const filter = {_id: objectId}
-    //   const result = await modelCollection.deleteOne({ _id: new ObjectId(id) });
-
-    //   res.send({
-    //     success: true,
-    //     result,
-    //   });
-    // });
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
