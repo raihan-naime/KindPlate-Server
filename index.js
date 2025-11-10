@@ -70,46 +70,48 @@ async function run() {
     });
 
     // update
-    app.get('/update-food/:id', async(req, res) =>{
+    app.get("/update-food/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const result = await addFoodCollection.findOne(query);
       res.send(result);
-    })
+    });
 
-    app.get('/manage-my-foods', async(req, res) =>{
-      const email = req.query.email
-      if(!email){
-        return res.status(400).send({success: false, message: 'email is required'})
+    app.get("/manage-my-foods", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        return res
+          .status(400)
+          .send({ success: false, message: "email is required" });
       }
-      const query = {donator_email: email};
+      const query = { donator_email: email };
       const result = await addFoodCollection.find(query).toArray();
       res.send(result);
-    })
-    
-    app.put('/update-food/:id', async (req, res) => {
+    });
+
+    app.put("/update-food/:id", async (req, res) => {
       const id = req.params.id;
       const data = req.body;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const update = {
-        $set: data
-      }
+        $set: data,
+      };
       const result = await addFoodCollection.updateOne(query, update);
+      res.send(result);
+    });
+
+    app.delete('/delete-food/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)}
+      const result = await addFoodCollection.deleteOne(query)
       res.send(result);
     })
 
-    // app.put("/models/:id", async (req, res) => {
+    // app.delete("/models/:id", async (req, res) => {
     //   const { id } = req.params;
-    //   const data = req.body;
-    //   // console.log(id)
-    //   // console.log(data)
-    //   const objectId = new ObjectId(id);
-    //   const filter = { _id: objectId };
-    //   const update = {
-    //     $set: data,
-    //   };
-
-    //   const result = await modelCollection.updateOne(filter, update);
+    //   //    const objectId = new ObjectId(id)
+    //   // const filter = {_id: objectId}
+    //   const result = await modelCollection.deleteOne({ _id: new ObjectId(id) });
 
     //   res.send({
     //     success: true,
