@@ -30,6 +30,7 @@ async function run() {
 
     const db = client.db("FoodsDb");
     const foodsCollection = db.collection("AllFoods");
+    const foodRequestCollection = db.collection('FoodRequests')
     // const addFoodCollection = db.collection("AddFoods");
 
     app.get("/allFoods", async (req, res) => {
@@ -79,11 +80,11 @@ async function run() {
 
     app.get("/manage-my-foods", async (req, res) => {
       const email = req.query.email;
-      if (!email) {
-        return res
-          .status(400)
-          .send({ success: false, message: "email is required" });
-      }
+      // if (!email) {
+      //   return res
+      //     .status(400)
+      //     .send({ success: false, message: "email is required" });
+      // }
       const query = { donator_email: email };
       const result = await foodsCollection.find(query).toArray();
       res.send(result);
@@ -107,7 +108,28 @@ async function run() {
       res.send(result);
     })
 
-    
+    // food request
+    app.post('/food-request', async(req, res) =>{
+      const foodRequest = req.body;
+      const result = await foodRequestCollection.insertOne(foodRequest);
+      res.send(result);
+    })
+
+    // my food request
+    app.get('/my-food-request', async(req, res) =>{
+      const email = req.query.email;
+      const query = {userEmail: email}
+      const result = await foodRequestCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    // food request only owner can see
+    app.get('/food-request/:foodId', async(req, res)=>{
+      const id = req.params.foodId;
+      const query = { foodId: id}
+      const result = await foodRequestCollection.find(query).toArray();
+      res.send(result);
+    } )
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
