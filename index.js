@@ -30,7 +30,7 @@ async function run() {
 
     const db = client.db("FoodsDb");
     const foodsCollection = db.collection("AllFoods");
-    const addFoodCollection = db.collection("AddFoods");
+    // const addFoodCollection = db.collection("AddFoods");
 
     app.get("/allFoods", async (req, res) => {
       const result = await foodsCollection.find().toArray();
@@ -53,12 +53,12 @@ async function run() {
     });
 
     app.get("/addFoods", async (req, res) => {
-      const result = await addFoodCollection.find().toArray();
+      const result = await foodsCollection.find().toArray();
       res.send(result);
     });
     app.post("/addFoods", async (req, res) => {
       const newFood = req.body;
-      const result = await addFoodCollection.insertOne(newFood);
+      const result = await foodsCollection.insertOne(newFood);
       res.send(result);
     });
 
@@ -73,7 +73,7 @@ async function run() {
     app.get("/update-food/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await addFoodCollection.findOne(query);
+      const result = await foodsCollection.findOne(query);
       res.send(result);
     });
 
@@ -85,7 +85,7 @@ async function run() {
           .send({ success: false, message: "email is required" });
       }
       const query = { donator_email: email };
-      const result = await addFoodCollection.find(query).toArray();
+      const result = await foodsCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -96,14 +96,14 @@ async function run() {
       const update = {
         $set: data,
       };
-      const result = await addFoodCollection.updateOne(query, update);
+      const result = await foodsCollection.updateOne(query, update);
       res.send(result);
     });
 
     app.delete('/delete-food/:id', async(req, res) =>{
       const id = req.params.id;
       const query = { _id: new ObjectId(id)}
-      const result = await addFoodCollection.deleteOne(query)
+      const result = await foodsCollection.deleteOne(query)
       res.send(result);
     })
 
