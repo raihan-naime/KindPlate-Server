@@ -28,51 +28,94 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    // const db = client.db("model-db");
-    // const modelCollection = db.collection("models");
-    // const downloadCollection = db.collection("downloads");
-
     const db = client.db("FoodsDb");
     const foodsCollection = db.collection("AllFoods");
-    const addFoodCollection = db.collection('AddFoods')
+    const addFoodCollection = db.collection("AddFoods");
 
-    //     app.get("/models", async (req, res) => {
-    //   const result = await modelCollection.find().toArray();
-    //   res.send(result);
-    // });
+    app.get("/allFoods", async (req, res) => {
+      const result = await foodsCollection.find().toArray();
+      res.send(result);
+    });
 
-    app.get('/allFoods', async(req, res) =>{
-        const result = await foodsCollection.find().toArray();
-        res.send(result);
-    })
+    app.get("/featuredFoods", async (req, res) => {
+      const result = await foodsCollection
+        .find()
+        .sort({ food_quantity: 1 })
+        .limit(6)
+        .toArray();
+      res.send(result);
+    });
 
-    app.get('/featuredFoods', async(req, res) =>{
-        const result = await foodsCollection.find().sort({food_quantity: 1}).limit(6).toArray();
-        res.send(result);
-    })
+    app.post("/allFoods", async (req, res) => {
+      const foodItem = req.body;
+      const result = await foodsCollection.insertOne(foodItem);
+      res.send(result);
+    });
 
-    app.post('/allFoods', async(req, res) => {
-        const foodItem = req.body;
-        const result = await foodsCollection.insertOne(foodItem)
-        res.send(result);
-    })
-    
-    app.get('/addFoods', async(req, res) =>{
+    app.get("/addFoods", async (req, res) => {
       const result = await addFoodCollection.find().toArray();
       res.send(result);
-    })
-    app.post('/addFoods', async(req, res) =>{
+    });
+    app.post("/addFoods", async (req, res) => {
       const newFood = req.body;
-      const result = await addFoodCollection.insertOne(newFood)
+      const result = await addFoodCollection.insertOne(newFood);
+      res.send(result);
+    });
+
+    app.get("/food/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodsCollection.findOne(query);
+      res.send(result);
+    });
+
+    // update
+    app.get('/update-food/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)}
+      const result = await addFoodCollection.findOne(query);
       res.send(result);
     })
 
-    app.get('/food/:id', async(req, res) =>{
-      const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
-      const result = await foodsCollection.findOne(query);
+    app.get('/manage-my-foods', async(req, res) =>{
+      const email = req.query.email
+      if(!email){
+        return res.status(400).send({success: false, message: 'email is required'})
+      }
+      const query = {donator_email: email};
+      const result = await addFoodCollection.find(query).toArray();
       res.send(result);
     })
+    
+    app.put('/update-food/:id', async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const query = {_id: new ObjectId(id)}
+      const update = {
+        $set: data
+      }
+      const result = await addFoodCollection.updateOne(query, update);
+      res.send(result);
+    })
+
+    // app.put("/models/:id", async (req, res) => {
+    //   const { id } = req.params;
+    //   const data = req.body;
+    //   // console.log(id)
+    //   // console.log(data)
+    //   const objectId = new ObjectId(id);
+    //   const filter = { _id: objectId };
+    //   const update = {
+    //     $set: data,
+    //   };
+
+    //   const result = await modelCollection.updateOne(filter, update);
+
+    //   res.send({
+    //     success: true,
+    //     result,
+    //   });
+    // });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
