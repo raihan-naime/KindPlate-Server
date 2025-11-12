@@ -30,18 +30,19 @@ async function run() {
 
     const db = client.db("FoodsDb");
     const foodsCollection = db.collection("AllFoods");
-    const foodRequestCollection = db.collection('FoodRequests')
+    const foodRequestCollection = db.collection("FoodRequests");
     // const addFoodCollection = db.collection("AddFoods");
 
     app.get("/allFoods", async (req, res) => {
-      const result = await foodsCollection.find().toArray();
+      const query = {food_status: 'Available'}
+      const result = await foodsCollection.find(query).toArray();
       res.send(result);
     });
 
     app.get("/featuredFoods", async (req, res) => {
       const result = await foodsCollection
         .find()
-        .sort({ food_quantity: 1 })
+        .sort({ food_quantity: -1 })
         .limit(6)
         .toArray();
       res.send(result);
@@ -101,35 +102,51 @@ async function run() {
       res.send(result);
     });
 
-    app.delete('/delete-food/:id', async(req, res) =>{
+    app.delete("/delete-food/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id)}
-      const result = await foodsCollection.deleteOne(query)
+      const query = { _id: new ObjectId(id) };
+      const result = await foodsCollection.deleteOne(query);
       res.send(result);
-    })
+    });
 
     // food request
-    app.post('/food-request', async(req, res) =>{
+    app.post("/food-request", async (req, res) => {
       const foodRequest = req.body;
       const result = await foodRequestCollection.insertOne(foodRequest);
       res.send(result);
-    })
+    });
 
     // my food request
-    app.get('/my-food-request', async(req, res) =>{
+    app.get("/my-food-request", async (req, res) => {
       const email = req.query.email;
-      const query = {userEmail: email}
+      const query = { userEmail: email };
       const result = await foodRequestCollection.find(query).toArray();
       res.send(result);
-    })
+    });
 
     // food request only owner can see
-    app.get('/food-request/:foodId', async(req, res)=>{
+    app.get("/food-request/:foodId", async (req, res) => {
       const id = req.params.foodId;
-      const query = { foodId: id}
+      const query = { foodId: id };
       const result = await foodRequestCollection.find(query).toArray();
       res.send(result);
-    } )
+    });
+
+    // accept
+    app.patch('/food-request/:id', async(req, res) => {
+      const id = req.params.id;
+      const {status} = req.body;
+      const query = { _id: new ObjectId(id)};
+      const update = {
+        $set: {
+          status: status
+        }
+      }
+      const result = await foodRequestCollection.updateOne(query, update)
+      res.send(result)
+    })
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -150,3 +167,6 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+
+
+
