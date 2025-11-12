@@ -133,7 +133,20 @@ async function run() {
     });
 
     // accept
-    app.patch('/food-request/:id', async(req, res) => {
+    app.patch('/food-request-accept/:id', async(req, res) => {
+      const id = req.params.id;
+      const {status} = req.body;
+      const query = { _id: new ObjectId(id)};
+      const update = {
+        $set: {
+          status: status
+        }
+      }
+      const result = await foodRequestCollection.updateOne(query, update)
+      res.send(result)
+    })
+    // reject
+    app.patch('/food-request-reject/:id', async(req, res) => {
       const id = req.params.id;
       const {status} = req.body;
       const query = { _id: new ObjectId(id)};
