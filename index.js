@@ -109,6 +109,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete('/delete-request/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)};
+      const result = await foodRequestCollection.deleteOne(query);
+      res.send(result);
+    })
+
     // food request
     app.post("/food-request", async (req, res) => {
       const foodRequest = req.body;
@@ -139,7 +146,8 @@ async function run() {
       const query = { _id: new ObjectId(id)};
       const update = {
         $set: {
-          status: status
+          status: status,
+          foodStatus: 'Accepted'
         }
       }
       const result = await foodRequestCollection.updateOne(query, update)
@@ -152,7 +160,8 @@ async function run() {
       const query = { _id: new ObjectId(id)};
       const update = {
         $set: {
-          status: status
+          status: status,
+          foodStatus: 'Rejected'
         }
       }
       const result = await foodRequestCollection.updateOne(query, update)
